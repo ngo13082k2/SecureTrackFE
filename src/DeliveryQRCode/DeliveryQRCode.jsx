@@ -5,43 +5,57 @@ import API_BASE_URL from "../config";
 
 const DeliveryQRCode = () => {
     const { deliveryId } = useParams();
-    const [qrCodes, setQrCodes] = useState([]);
+    const [groupedQrCodes, setGroupedQrCodes] = useState([]); // Dữ liệu nhóm theo itemId
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem("token"); // Hoặc sessionStorage
+        const token = localStorage.getItem("token");
+
         axios.get(`${API_BASE_URL}/api/qrcode/delivery/${deliveryId}`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         })
-            .then((response) => {
-                setQrCodes(response.data);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error("Error fetching QR codes:", error);
-                setLoading(false);
-            });
+        .then((response) => {
+            setGroupedQrCodes(response.data); // API mới trả về danh sách nhóm QR codes theo item
+            setLoading(false);
+        })
+        .catch((error) => {
+            console.error("Lỗi khi lấy QR codes:", error);
+            setLoading(false);
+        });
     }, [deliveryId]);
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <p className="text-center text-gray-500">Đang tải...</p>;
 
     return (
         <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4 text-center">QR Codes for Delivery {deliveryId}</h1>
-            <div className="grid grid-cols-3 gap-4">
-                {qrCodes.length > 0 ? (
-                    qrCodes.map((qr, index) => (
-                        <div key={index} className="p-4 bg-white shadow-lg rounded-lg text-center">
-                            <img src={`data:image/png;base64,${qr.qrCodeImage}`} alt="QR Code" className="mx-auto w-32 h-32" />
-                            <p className="mt-2 text-sm font-medium">{qr.qrCode}</p>
+            <h1 className="text-2xl font-bold mb-4 text-center">
+                QR Codes cho Delivery {deliveryId}
+            </h1>
+            {groupedQrCodes.length > 0 ? (
+                groupedQrCodes.map((group, index) => (
+                    <div key={index} className="mb-6 p-4 bg-gray-100 shadow-lg rounded-lg">
+                        <h2 className="text-xl font-semibold mb-2">
+                            Sản phẩm: {group.productName} (ID: {group.itemId})
+                        </h2>
+                        <div className="grid grid-cols-3 gap-4">
+                            {group.qrCodes.map((qr, qrIndex) => (
+                                <div key={qrIndex} className="p-4 bg-white shadow-lg rounded-lg text-center">
+                                    <img 
+                                        src={`data:image/png;base64,${qr.qrCodeImage}`} 
+                                        alt="QR Code" 
+                                        className="mx-auto w-32 h-32"
+                                    />
+                                    <p className="mt-2 text-sm font-medium">{qr.qrCode}</p>
+                                </div>
+                            ))}
                         </div>
-                    ))
-                ) : (
-                    <p className="text-center text-gray-500">Không có QR Code nào!</p>
-                )}
-            </div>
+                    </div>
+                ))
+            ) : (
+                <p className="text-center text-gray-500">Không có QR Code nào!</p>
+            )}
         </div>
     );
 };
