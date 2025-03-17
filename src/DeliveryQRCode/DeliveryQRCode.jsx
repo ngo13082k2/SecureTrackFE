@@ -35,11 +35,16 @@ const DeliveryQRCode = () => {
             </h1>
             {groupedQrCodes.length > 0 ? (
                 groupedQrCodes.map((group, index) => (
-                    <div key={index} className="mb-6 p-4 bg-gray-100 shadow-lg rounded-lg">
-                        <h2 className="text-xl font-semibold mb-2">
-                            Sản phẩm: {group.productName} (ID: {group.itemId})
-                        </h2>
-                        <div className="grid grid-cols-3 gap-4">
+                    <div key={index} className="print-page-break">
+                        {/* Phần Tiêu Đề (Luôn Giữ Khi In) */}
+                        <div className="print-header">
+                            <h2 className="text-xl font-semibold mb-2">
+                                Sản phẩm: {group.productName} (ID: {group.itemId})
+                            </h2>
+                        </div>
+    
+                        {/* Danh sách QR Code */}
+                        <div className="grid grid-cols-6 gap-4">
                             {group.qrCodes.map((qr, qrIndex) => (
                                 <div key={qrIndex} className="p-4 bg-white shadow-lg rounded-lg text-center">
                                     <img 
@@ -58,6 +63,9 @@ const DeliveryQRCode = () => {
             )}
         </div>
     );
+    
+    
+    
 };
 
 export default DeliveryQRCode;

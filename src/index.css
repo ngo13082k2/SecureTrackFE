@@ -14,3 +14,28 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+@media print {
+  /* Mỗi sản phẩm bắt đầu trên trang mới */
+  .print-page-break {
+      break-before: page;
+      page-break-before: always;
+  }
+
+  /* Tiêu đề sản phẩm được giữ khi in */
+  .print-header {
+      position: running(header); /* Luôn xuất hiện đầu mỗi trang */
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      background-color: white;
+      padding: 10px;
+      border-bottom: 2px solid black;
+  }
+
+  /* Định nghĩa trang in */
+  @page {
+      margin-top: 70px; /* Tạo khoảng trống để tiêu đề không bị cắt */
+  }
+}
+
+
