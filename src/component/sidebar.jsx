@@ -13,6 +13,10 @@ const Sidebar = () => {
                     <li>
                         <Link to="/delivery" className="block py-2 px-4 hover:bg-gray-700">Delivery</Link>
                     </li>
+                    <li>
+                        <Link to="/order" className="block py-2 px-4 hover:bg-gray-700">Order</Link>
+                    </li>
+                    
                 </ul>
             </div>
         </div>

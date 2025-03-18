@@ -3,6 +3,7 @@ import Login from "./Login/Login"
 import MasterDataPage from "./MasterData/MasterDataPage";
 import DeliveryPage from "./Delivery/DeliveryPage";
 import DeliveryQRCode from "./DeliveryQRCode/DeliveryQRCode";
+import OrderDetail from "./OrderDetail/OrderDetail";
 
 const AppRoutes = () => {
   return (
@@ -12,6 +13,8 @@ const AppRoutes = () => {
         <Route path="/masterData" element={<MasterDataPage />} />
         <Route path="/delivery" element={<DeliveryPage />} />
         <Route path="/qrcode/:deliveryId" element={<DeliveryQRCode />} />
+        <Route path="/order" element={<OrderDetail />} />
+
       </Routes>
     </Router>
   );

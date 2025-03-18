@@ -36,21 +36,31 @@ const DeliveryQRCode = () => {
         setLoading(true);
         setSelectedItem(item);
         const token = localStorage.getItem("token");
-
+    
         axios.get(`${API_BASE_URL}/api/qrcode/delivery/getByItemAndBatch/${deliveryId}`, {
             params: { itemId: item.itemId, batch: item.batch },
             headers: { Authorization: `Bearer ${token}` }
         })
         .then((response) => {
-            setGroupedQrCodes(response.data); // Cập nhật danh sách QR Code
+            if (response.status === 200) {
+                setGroupedQrCodes(response.data); // Cập nhật danh sách QR Code
+            } else {
+                console.error("Lỗi dữ liệu không hợp lệ:", response);
+                setGroupedQrCodes([]);
+            }
             setLoading(false);
         })
         .catch((error) => {
-            console.error("Error fetching QR codes:", error);
-            setGroupedQrCodes([]); // Nếu lỗi thì xóa dữ liệu cũ
+            if (error.response && error.response.status === 403) {
+                alert("Bạn không có quyền truy cập vào dữ liệu này!"); // Hoặc chuyển hướng trang
+            } else {
+                console.error("Lỗi khi lấy QR codes:", error);
+            }
+            setGroupedQrCodes([]); // Xóa dữ liệu cũ khi lỗi
             setLoading(false);
         });
     };
+    
 
     if (loading) return <p className="text-center text-gray-500">Đang tải...</p>;
 
