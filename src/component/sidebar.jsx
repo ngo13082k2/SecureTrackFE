@@ -16,6 +16,12 @@ const Sidebar = () => {
                     <li>
                         <Link to="/order" className="block py-2 px-4 hover:bg-gray-700">Order</Link>
                     </li>
+                    <li>
+                        <Link to="/orderlist" className="block py-2 px-4 hover:bg-gray-700">OrderList</Link>
+                    </li>
+                    <li>
+                        <Link to="/customer" className="block py-2 px-4 hover:bg-gray-700">Customer</Link>
+                    </li>
                     
                 </ul>
             </div>
