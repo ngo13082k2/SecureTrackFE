@@ -8,7 +8,7 @@ const CustomerPage = () => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/customers/mycustomer`, {
+        const response = await axios.get(`${API_BASE_URL}/customers`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCustomers(response.data);
@@ -49,7 +49,7 @@ const CustomerPage = () => {
                   <td className="py-3 px-6 text-left">{customer.district}</td>
                   <td className="py-3 px-6 text-left">{customer.ward}</td>
                   <td className="py-3 px-6 text-left">{customer.street}</td>
-                  <td className="py-3 px-6 text-left">{customer.addressDetail}</td>
+                  <td className="py-3 px-6 text-left">{customer.detailAddress}</td>
                 </tr>
               ))}
             </tbody>
