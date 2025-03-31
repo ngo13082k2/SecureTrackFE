@@ -1,0 +1,179 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+import API_BASE_URL from "../config";
+import Sidebar from "../component/sidebar";
+const InboundPage = () => {
+  const [data, setData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [details, setDetails] = useState([]);
+  const [detailPage, setDetailPage] = useState(0);
+  const [detailTotalPages, setDetailTotalPages] = useState(0);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [totalQuantity, setTotalQuantity] = useState(0);
+  const [grandTotal, setGrandTotal] = useState(0);
+  const pageSize = 15;
+
+  useEffect(() => {
+    fetchData(currentPage);
+  }, [currentPage]);
+
+  const fetchData = async (page) => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/inbounds/uniqueItems`, {
+        params: { page, size: pageSize, startDate, endDate },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setData(response.data.data);
+      setTotalPages(response.data.totalPages);
+      setGrandTotal(response.data.grandTotal);
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const fetchDetails = async (itemName, page) => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/inbounds/searchbyitemName`, {
+        params: { itemName, page, size: pageSize },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setDetails(response.data.data);
+      setDetailTotalPages(response.data.totalPages);
+      setDetailPage(page);
+    } catch (error) {
+      console.error("Error fetching details:", error);
+    }
+  };
+
+  const openPopup = (itemName) => {
+    setSelectedItem(itemName);
+    setShowPopup(true);
+    fetchDetails(itemName, 0);
+  };
+
+  return (
+    <div className="flex h-screen">
+      {/* Sidebar bên trái */}
+      <Sidebar />
+      <div className="flex-1  mt-8 p-6 bg-white shadow-lg rounded-lg overflow-auto">
+      <h2 className="text-xl font-bold mb-4">Unique Items List</h2>
+      <div className="flex space-x-4 mb-4">
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          className="border p-2 rounded"
+        />
+        <input
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          className="border p-2 rounded"
+        />
+        <button onClick={() => fetchData(0)} className="bg-blue-500 text-white px-4 py-2 rounded">Lọc</button>
+      </div>
+
+      <p className="text-lg font-medium mb-2">📊 Tổng số lượng: <span className="font-bold text-blue-600">{grandTotal}</span></p>
+      <table className="w-full border-collapse border border-gray-300">
+        <thead>
+          <tr className="bg-gray-200">
+            <th className="border border-gray-300 px-4 py-2">Item</th>
+
+            <th className="border border-gray-300 px-4 py-2">Item Name</th>
+            <th className="border border-gray-300 px-4 py-2">Total</th>
+            <th className="border border-gray-300 px-4 py-2">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item, index) => (
+            <tr key={index} className="hover:bg-gray-100">
+              <td className="border border-gray-300 px-4 py-2">{item.item}</td>
+
+              <td className="border border-gray-300 px-4 py-2">{item.itemName}</td>
+              <td className="border border-gray-300 px-4 py-2 text-center">{item.total}</td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                <button
+                  className="px-3 py-1 bg-green-500 text-white rounded"
+                  onClick={() => openPopup(item.itemName)}
+                >
+                  Detail
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="flex justify-center mt-4 space-x-2">
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+          disabled={currentPage === 0}
+        >
+          Previous
+        </button>
+        <span className="px-4 py-2">Page {currentPage + 1} of {totalPages}</span>
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))}
+          disabled={currentPage >= totalPages - 1}
+        >
+          Next
+        </button>
+      </div>
+
+      {showPopup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-4 rounded shadow-lg w-3/4">
+            <h3 className="text-lg font-bold mb-2">Details for {selectedItem}</h3>
+            <table className="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="border border-gray-300 px-4 py-2">ID</th>
+                  <th className="border border-gray-300 px-4 py-2">Item Name</th>
+                  <th className="border border-gray-300 px-4 py-2">Supplier</th>
+                  <th className="border border-gray-300 px-4 py-2">QR Code</th>
+                  <th className="border border-gray-300 px-4 py-2">Import Date</th>
+                  <th className="border border-gray-300 px-4 py-2">Manufacturing Date</th>
+                  <th className="border border-gray-300 px-4 py-2">Expiration Date</th>
+                  <th className="border border-gray-300 px-4 py-2">Batch</th>
+                  <th className="border border-gray-300 px-4 py-2">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {details.map((detail, index) => (
+                  <tr key={index} className="hover:bg-gray-100">
+                    <td className="border border-gray-300 px-4 py-2">{detail.id}</td>
+                    <td className="border border-gray-300 px-4 py-2">{detail.itemName}</td>
+                    <td className="border border-gray-300 px-4 py-2">{detail.supplier}</td>
+                    <td className="border border-gray-300 px-4 py-2">{detail.qrCode}</td>
+                    <td className="border border-gray-300 px-4 py-2">{detail.importDate}</td>
+                    <td className="border border-gray-300 px-4 py-2">{detail.manufacturingDate}</td>
+                    <td className="border border-gray-300 px-4 py-2">{detail.expirationDate}</td>
+                    <td className="border border-gray-300 px-4 py-2">{detail.batch}</td>
+                    <td className="border border-gray-300 px-4 py-2">{detail.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="flex justify-between items-center mt-4">
+              <button onClick={() => fetchDetails(selectedItem, detailPage - 1)} disabled={detailPage === 0} className={`px-4 py-2 rounded ${detailPage === 0 ? "bg-gray-300" : "bg-blue-500 text-white"}`}>⬅ Trang trước</button>
+              <span className="text-lg font-medium">Trang {detailPage + 1} / {detailTotalPages}</span>
+              <button onClick={() => fetchDetails(selectedItem, detailPage + 1)} disabled={detailPage >= detailTotalPages - 1} className={`px-4 py-2 rounded ${detailPage >= detailTotalPages - 1 ? "bg-gray-300" : "bg-blue-500 text-white"}`}>Trang sau ➡</button>
+            </div>
+            <button className="mt-4 px-4 py-2 bg-red-500 text-white rounded" onClick={() => setShowPopup(false)}>Close</button>
+          </div>
+        </div>
+      )}
+    </div>
+    </div>
+  );
+};
+
+export default InboundPage;

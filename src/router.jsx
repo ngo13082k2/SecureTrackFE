@@ -6,6 +6,9 @@ import DeliveryQRCode from "./DeliveryQRCode/DeliveryQRCode";
 import OrderDetail from "./OrderDetail/OrderDetail";
 import OrderList from "./OrderList/OrderList";
 import CustomerPage from "./CustomerPage/CustomerPage";
+import OutboundPage from "./OutboundPage/OutboundPage";
+import InboundPage from "./InboundPage/InboundPage";
+import InventoryPage from "./InventoryPage/InventoryPage";
 const AppRoutes = () => {
   return (
     <Router>
@@ -17,6 +20,10 @@ const AppRoutes = () => {
         <Route path="/order" element={<OrderDetail />} />
         <Route path="/orderlist" element={<OrderList />} />
         <Route path="/customer" element={<CustomerPage />} />
+        <Route path="/outbound" element={<OutboundPage />} />
+        <Route path="/inbound" element={<InboundPage />} />
+        <Route path="/inventory" element={<InventoryPage />} />
+
 
       </Routes>
     </Router>

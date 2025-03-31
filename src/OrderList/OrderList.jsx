@@ -152,7 +152,7 @@ const OrderList = () => {
                   <th className="border p-3 text-left">📅 NSX</th>
                   <th className="border p-3 text-left">⏳ HSD</th>
                   <th className="border p-3 text-left">🔢 Lô sản xuất</th>
-                  <th className="border p-3 text-left">👤 Chủ sở hữu</th>
+                  <th className="border p-3 text-left">👤 Đại lý</th>
                 </tr>
               </thead>
               <tbody>
@@ -199,7 +199,7 @@ const OrderList = () => {
                   <th className="border p-3 text-left">📅 NSX</th>
                   <th className="border p-3 text-left">⏳ HSD</th>
                   <th className="border p-3 text-left">🔢 Lô sản xuất</th>
-                  <th className="border p-3 text-left">👤 Chủ sở hữu</th>
+                  <th className="border p-3 text-left">👤 Đại lý</th>
                 </tr>
               </thead>
               <tbody>

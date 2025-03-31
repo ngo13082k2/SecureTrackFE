@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import API_BASE_URL from "../config";
 
-const ITEMS_PER_PAGE = 42; // Số QR Codes mỗi trang
+const ITEMS_PER_PAGE = 24; // Số QR Codes mỗi trang
 
 const DeliveryQRCode = () => {
     const { deliveryId } = useParams();
