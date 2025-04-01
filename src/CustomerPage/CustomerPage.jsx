@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import API_BASE_URL from "../config";
+import Sidebar from "../component/sidebar";
 const CustomerPage = () => {
   const [customers, setCustomers] = useState([]);
   const token = localStorage.getItem("token");
@@ -21,7 +22,10 @@ const CustomerPage = () => {
   }, [token]);
 
   return (
-    <div className="max-w-6xl mx-auto mt-8 p-6 bg-white shadow-lg rounded-lg">
+    <div className="flex h-screen">
+    {/* Sidebar bên trái */}
+    <Sidebar/>
+    <div className="flex-1  mt-8 p-6 bg-white shadow-lg rounded-lg overflow-auto">
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">📋 Danh Sách Khách Hàng</h2>
 
       {customers.length === 0 ? (
@@ -56,6 +60,7 @@ const CustomerPage = () => {
           </table>
         </div>
       )}
+    </div>
     </div>
   );
 };

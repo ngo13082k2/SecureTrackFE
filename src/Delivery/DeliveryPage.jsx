@@ -85,6 +85,7 @@ const DeliveryPage = () => {
             return;
         }
 
+        setIsUploading(true); // Bắt đầu loading
         const formData = new FormData();
         formData.append("file", selectedFile);
 
@@ -102,9 +103,10 @@ const DeliveryPage = () => {
         } catch (error) {
             setMessage(error.response?.data?.message || "Lỗi khi tải file lên!");
             setIsError(true);
+        } finally {
+            setIsUploading(false); // Kết thúc loading
         }
     };
-
     const handleGenerateQRCode = () => {
         setGenerating(true);
         const token = localStorage.getItem("token");
@@ -176,8 +178,12 @@ const DeliveryPage = () => {
                 <div className="mb-4 p-4 bg-white shadow-lg rounded-lg">
                     <h2 className="text-lg font-semibold mb-2">Upload File Excel</h2>
                     <input type="file" accept=".xlsx" onChange={handleFileChange} className="mb-2" />
-                    <button onClick={handleUpload} className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Upload</button>
                     <button
+                        onClick={handleUpload}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center"
+                        disabled={isUploading}>
+                        {isUploading ? <ClipLoader size={20} color="#ffffff" /> : "Upload"}
+                    </button>                    <button
                         onClick={handleGenerateQRCode}
                         className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700 mb-4 flex items-center justify-center"
                         disabled={generating}>

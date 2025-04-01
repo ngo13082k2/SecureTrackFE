@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import API_BASE_URL from "../config";
-
+import Sidebar from "../component/sidebar";
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -63,7 +63,11 @@ const OrderList = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto mt-8 p-6 bg-white shadow-lg rounded-lg">
+
+     <div className="flex h-screen">
+      {/* Sidebar bên trái */}
+      <Sidebar/>
+      <div className="flex-1  mt-8 p-6 bg-white shadow-lg rounded-lg overflow-auto">
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">📦 Danh sách đơn hàng</h2>
 
       {/* Form tìm kiếm */}
@@ -218,6 +222,7 @@ const OrderList = () => {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };
