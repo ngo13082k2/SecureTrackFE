@@ -8,6 +8,8 @@ import Modal from "react-modal";
 
 
 const DeliveryPage = () => {
+    const [isUploading, setIsUploading] = useState(false);
+
     const navigate = useNavigate();
     const [deliveries, setDeliveries] = useState([]);
     const [selectedDelivery, setSelectedDelivery] = useState(null);
