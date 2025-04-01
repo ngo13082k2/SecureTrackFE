@@ -61,7 +61,7 @@ const OrderDetail = () => {
             }
         } catch (error) {
             console.error("Lỗi khi tìm kiếm khách hàng:", error);
-            alert("Không tìm thấy khách hàng hoặc lỗi API.");
+            alert("Không tìm thấy khách hàng.");
         } finally {
             setLoading(false);
         }
