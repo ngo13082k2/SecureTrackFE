@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import API_BASE_URL from "../config";
-import { useNavigate } from 'react-router-dom';
-import Sidebar from '../component/sidebar';
+import { useNavigate, useLocation } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; import Sidebar from '../component/sidebar';
 
 const MasterDataPage = () => {
     const navigate = useNavigate();
@@ -19,6 +20,14 @@ const MasterDataPage = () => {
             navigate("/login");
             return;
         }
+
+        const loginSuccess = localStorage.getItem("loginSuccess");
+        if (loginSuccess === "true") {
+            toast.success("🎉 Đăng nhập thành công!"); // ✅ chỉ toast ở đây
+            setTimeout(() => {
+                localStorage.removeItem("loginSuccess");
+              }, 500);        }
+
         fetchData();
     }, [token, navigate]);
 
@@ -92,6 +101,8 @@ const MasterDataPage = () => {
     };
     return (
         <div className="flex">
+            <ToastContainer position="top-right" autoClose={3000} />
+
             <Sidebar />
             <div className="flex-1 p-4">
                 <h1 className="text-3xl font-semibold mb-4 text-center">Danh sách Master Data</h1>
@@ -189,6 +200,7 @@ const MasterDataPage = () => {
                     </div>
                 )}
             </div>
+
         </div>
     );
 };

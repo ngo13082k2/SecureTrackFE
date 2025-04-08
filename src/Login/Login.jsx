@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API_BASE_URL from "../config";
 import { jwtDecode } from "jwt-decode"; // Sử dụng cú pháp đúng để nhập khẩu jwtDecode
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -24,23 +26,24 @@ const Login = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/api/auth/login`, formData);
       const { token } = response.data;
-
-      // Lưu token vào localStorage
+    
       localStorage.setItem("token", token);
-
-      // Giải mã token để lấy thông tin role
-      const decodedToken = jwtDecode(token);  // Sử dụng jwtDecode để giải mã token
-      const userRole = response.data.role; // Giả sử vai trò lưu trong "role"
-
-      // Kiểm tra vai trò và chuyển hướng
-      if (userRole == 'MEMBER') {
-        navigate("/masterData"); // Chuyển hướng đến trang masterData nếu vai trò là member
+      const decodedToken = jwtDecode(token);
+      const userRole = response.data.role;
+    
+    
+      if (userRole === 'MEMBER') {
+        localStorage.setItem("loginSuccess", "true"); // 👈 Đánh dấu đã đăng nhập thành công
+        navigate("/masterData");
       } else {
-        navigate("/dashboard"); // Nếu không phải member, chuyển hướng đến dashboard
+        navigate("/dashboard");
       }
     } catch (err) {
+      console.error("Lỗi đăng nhập:", err);
       setError("❌ Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin.");
+      toast.error("❌ Đăng nhập thất bại!");
     }
+    
   };
 
   return (
@@ -96,7 +99,10 @@ const Login = () => {
           </p>
         </div>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+
     </div>
+    
   );
 };
 

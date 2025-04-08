@@ -19,6 +19,7 @@ const InventoryPage = () => {
   const [endDate, setEndDate] = useState("");
   const [qrCode, setQrCode] = useState("");
   const [qrItem, setQrItem] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
 
   const fetchInventory = async (page = 0) => {
     try {
@@ -64,15 +65,25 @@ const InventoryPage = () => {
       console.error("Lỗi khi đổi trạng thái sản phẩm:", error);
     }
   };
-
-  const fetchDetails = async (item, page = 0) => {
+  const handlePageChange = (newPage) => {
+    // Cập nhật lại trang mới
+    setDetailPage(newPage);
+    // Gọi lại fetchDetails với trang mới
+    fetchDetails(newPage);
+  };
+  const fetchDetails = async (page = 0) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/inbounds/byItem`, {
-        params: { item, page, size: 10 },
+      const response = await axios.get(`${API_BASE_URL}/api/inbounds/allInventory`, {
+        params: {
+          page,
+          size: 10,
+          startDate: startDate || undefined,  // thêm startDate nếu có
+          endDate: endDate || undefined       // thêm endDate nếu có
+        },
         headers: { Authorization: `Bearer ${token}` },
       });
+
       setDetails(response.data.data);
-      setDetailItem(item);
       setDetailPage(response.data.currentPage);
       setDetailTotalPages(response.data.totalPages);
       setShowDetails(true);
@@ -80,6 +91,43 @@ const InventoryPage = () => {
       console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
     }
   };
+  const downloadExcel = async (startDate, endDate) => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      const response = await axios.get(`${API_BASE_URL}/api/inbounds/export`, {
+        params: { startDate, endDate },
+        headers: {
+          Authorization: `Bearer ${token}` },
+        responseType: "blob",
+      });
+  
+      // 🔧 Format ngày
+      const formatDate = (dateStr) => {
+        const date = new Date(dateStr);
+        return date.toISOString().split("T")[0]; // YYYY-MM-DD
+      };
+  
+      const formattedStart = startDate ? formatDate(startDate) : "all";
+      const formattedEnd = endDate ? formatDate(endDate) : "all";
+      const fileName = `inbound-${formattedStart}_to_${formattedEnd}.xlsx`;
+  
+      // 📥 Tạo link và tải file
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("❌ Lỗi khi tải file Excel:", error);
+      alert("Không thể tải file Excel.");
+    }
+  };
+  
+
+
 
   useEffect(() => {
     fetchInventory();
@@ -89,10 +137,10 @@ const InventoryPage = () => {
     <div className="flex h-screen">
       {/* Sidebar bên trái */}
       <Sidebar />
-      <div className="flex-1  mt-8 p-6 bg-white shadow-lg rounded-lg overflow-auto">
+      <div className="flex-1 mt-8 p-6 bg-white shadow-lg rounded-lg overflow-auto">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">📦 Danh sách tồn kho</h2>
         <div className="flex space-x-4 mb-4">
-        <input
+          <input
             type="text"
             placeholder="Nhập mã QR..."
             value={qrCode}
@@ -100,8 +148,8 @@ const InventoryPage = () => {
             className="border p-2 rounded"
           />
           {/* <button onClick={fetchItemByQrCode} className="bg-blue-500 text-white px-4 py-2 rounded">
-            🔍 Tìm kiếm
-          </button> */}
+      🔍 Tìm kiếm
+    </button> */}
           <button onClick={toggleStatusByQrCode} className="bg-yellow-500 text-white px-4 py-2 rounded">
             🔄 Đổi trạng thái
           </button>
@@ -112,7 +160,6 @@ const InventoryPage = () => {
             onChange={(e) => setStartDate(e.target.value)}
             className="border p-2 rounded"
           />
-
           <label className="text-gray-700 font-medium">📅 Đến ngày:</label>
           <input
             type="date"
@@ -120,7 +167,6 @@ const InventoryPage = () => {
             onChange={(e) => setEndDate(e.target.value)}
             className="border p-2 rounded"
           />
-
           <button
             onClick={() => fetchInventory(0)}
             className="bg-blue-500 text-white px-4 py-2 rounded"
@@ -128,6 +174,24 @@ const InventoryPage = () => {
             📊 Lọc
           </button>
         </div>
+
+        <div className="flex justify-end mb-4 gap-2">
+          <button
+            onClick={() => fetchDetails()} // Gọi fetchDetails khi bấm nút Chi tiết
+            className="bg-green-500 text-white px-4 py-2 rounded"
+          >
+            📋 Chi tiết
+          </button>
+
+          <button
+            onClick={() => downloadExcel(startDate, endDate)} // Truyền ngày lọc vào
+            className="bg-purple-500 text-white px-4 py-2 rounded"
+          >
+            📥 Tải Excel
+          </button>
+        </div>
+
+
 
         <p className="text-lg font-medium text-gray-700 mb-2">📊 Tổng số sản phẩm tồn kho:
           <span className="font-bold text-blue-600"> {grandTotal}</span>
@@ -141,25 +205,15 @@ const InventoryPage = () => {
               <tr className="bg-gray-100">
                 <th className="border p-3">📦 Sản phẩm</th>
                 <th className="border p-3">🏷️ Tên sản phẩm</th>
-                <th className="border p-3">🏷️ Số lương</th>
-
-                <th className="border p-3">🔍 Chi tiết</th>
+                <th className="border p-3">🏷️ Số lượng</th>
               </tr>
             </thead>
             <tbody>
               {inventory.map((item) => (
                 <tr key={item.id} className="border">
                   <td className="border p-3">{item.item}</td>
-
                   <td className="border p-3">{item.itemName}</td>
                   <td className="border p-3">{item.total}</td>
-
-                  <td className="border p-3">
-                    <button
-                      onClick={() => fetchDetails(item.item)}
-                      className="bg-green-500 text-white px-4 py-2 rounded"
-                    >📋 Chi tiết</button>
-                  </td>
                 </tr>
               ))}
             </tbody>
@@ -187,9 +241,7 @@ const InventoryPage = () => {
         {showDetails && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
             <div className="bg-white p-6 rounded-lg shadow-lg w-7/10 max-w-5xl relative transform transition-all">
-              <h3 className="text-xl font-semibold mb-4 text-center">
-                📋 Chi tiết sản phẩm ID: {detailItem}
-              </h3>
+              <h3 className="text-xl font-semibold mb-4 text-center">📋 Chi tiết sản phẩm</h3>
 
               {/* Nút Đóng */}
               <button
@@ -239,18 +291,33 @@ const InventoryPage = () => {
 
               {/* Phân trang */}
               <div className="flex justify-between items-center mt-4">
+                {/* Nút Trang trước */}
                 <button
-                  onClick={() => fetchDetails(detailItem, detailPage - 1)}
+                  onClick={() => {
+                    if (detailPage > 0) {
+                      fetchDetails(detailPage - 1); // Giảm trang và gọi lại hàm fetch
+                    }
+                  }}
                   disabled={detailPage === 0}
-                  className="px-4 py-2 rounded bg-gray-500 text-white disabled:opacity-50"
+                  className={`px-4 py-2 rounded ${detailPage === 0 ? "bg-gray-300" : "bg-blue-500 text-white"}`}
                 >
                   ⬅ Trang trước
                 </button>
-                <span className="text-lg font-medium">Trang {detailPage + 1} / {detailTotalPages}</span>
+
+                {/* Hiển thị trang hiện tại và tổng số trang */}
+                <span className="text-lg font-medium">
+                  Trang {detailPage + 1} / {detailTotalPages}
+                </span>
+
+                {/* Nút Trang sau */}
                 <button
-                  onClick={() => fetchDetails(detailItem, detailPage + 1)}
+                  onClick={() => {
+                    if (detailPage < detailTotalPages - 1) {
+                      fetchDetails(detailPage + 1); // Tăng trang và gọi lại hàm fetch
+                    }
+                  }}
                   disabled={detailPage >= detailTotalPages - 1}
-                  className="px-4 py-2 rounded bg-gray-500 text-white disabled:opacity-50"
+                  className={`px-4 py-2 rounded ${detailPage >= detailTotalPages - 1 ? "bg-gray-300" : "bg-blue-500 text-white"}`}
                 >
                   Trang sau ➡
                 </button>
@@ -258,6 +325,9 @@ const InventoryPage = () => {
             </div>
           </div>
         )}
+
+
+
       </div>
     </div>
   );
