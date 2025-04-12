@@ -14,6 +14,7 @@ const AppRoutes = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/masterData" element={<MasterDataPage />} />
         <Route path="/delivery" element={<DeliveryPage />} />
         <Route path="/qrcode/:deliveryId" element={<DeliveryQRCode />} />

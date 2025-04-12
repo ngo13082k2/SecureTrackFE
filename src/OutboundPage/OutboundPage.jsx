@@ -64,7 +64,7 @@ const OutboundPage = () => {
   const downloadOutboundExcel = async (startDate, endDate) => {
     try {
       const token = localStorage.getItem("token");
-  
+
       const response = await axios.get(`${API_BASE_URL}/api/outbounds/export`, {
         params: { startDate, endDate },
         headers: {
@@ -72,17 +72,17 @@ const OutboundPage = () => {
         },
         responseType: "blob",
       });
-  
+
       // Format tên file
       const formatDate = (dateStr) => {
         const date = new Date(dateStr);
         return date.toISOString().split("T")[0]; // YYYY-MM-DD
       };
-  
+
       const formattedStart = startDate ? formatDate(startDate) : "all";
       const formattedEnd = endDate ? formatDate(endDate) : "all";
       const filename = `outbound-${formattedStart}_to_${formattedEnd}.xlsx`;
-  
+
       // Tải file
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
@@ -96,7 +96,7 @@ const OutboundPage = () => {
       alert("Không thể tải file Excel Outbound.");
     }
   };
-  
+
 
 
 
@@ -178,14 +178,17 @@ const OutboundPage = () => {
                 <table className="w-full border-collapse border border-gray-200">
                   <thead>
                     <tr className="bg-gray-100">
+                      
                       <th className="border p-3">Mã đơn</th>
                       <th className="border p-3">Khách hàng</th>
+                      <th className="border p-3">item</th>
+                      <th className="border p-3">itemName</th>
+
                       <th className="border p-3">QR Code</th>
                       <th className="border p-3">Ngày bán</th>
                       <th className="border p-3">NSX</th>
                       <th className="border p-3">HSD</th>
                       <th className="border p-3">Lô hàng</th>
-                      <th className="border p-3">Trạng thái</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -193,21 +196,33 @@ const OutboundPage = () => {
                       <tr key={index} className="border">
                         <td className="border p-3">{detail.orderId}</td>
                         <td className="border p-3">{detail.customerName}</td>
+                        <td className="border p-3">{detail.item}</td>
+                        <td className="border p-3">{detail.itemName}</td>
+
                         <td className="border p-3">{detail.qrCode}</td>
                         <td className="border p-3">{new Date(detail.saleDate).toLocaleDateString()}</td>
                         <td className="border p-3">{new Date(detail.manufacturingDate).toLocaleDateString()}</td>
                         <td className="border p-3">{new Date(detail.expirationDate).toLocaleDateString()}</td>
                         <td className="border p-3">{detail.batch}</td>
-                        <td className="border p-3 text-green-500 font-bold">{detail.status}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               )}
 
+          
               {/* Pagination in Popup */}
-              {/* Pagination in Popup */}
-              <div className="flex justify-between items-center mt-4">
+              <div className="flex justify-between items-center mt-4 flex-wrap gap-2">
+                {/* Nút Trang đầu */}
+                <button
+                  onClick={() => fetchOutboundDetails(0)}
+                  disabled={currentPage === 0}
+                  className={`px-4 py-2 rounded ${currentPage === 0 ? "bg-gray-300" : "bg-blue-500 text-white"}`}
+                >
+                  ⏮ Trang đầu
+                </button>
+
+                {/* Nút Trang trước */}
                 <button
                   onClick={() => fetchOutboundDetails(currentPage - 1)}
                   disabled={currentPage === 0}
@@ -216,10 +231,12 @@ const OutboundPage = () => {
                   ⬅ Trang trước
                 </button>
 
+                {/* Hiển thị trang hiện tại */}
                 <span className="text-lg font-medium">
-                  Trang {currentPage + 1}
+                  Trang {currentPage + 1} / {totalPages}
                 </span>
 
+                {/* Nút Trang sau */}
                 <button
                   onClick={() => fetchOutboundDetails(currentPage + 1)}
                   disabled={detailIsLastPage}
@@ -227,14 +244,25 @@ const OutboundPage = () => {
                 >
                   Trang sau ➡
                 </button>
+
+                {/* Nút Trang cuối */}
+                <button
+                  onClick={() => fetchOutboundDetails(totalPages - 1)}
+                  disabled={detailIsLastPage}
+                  className={`px-4 py-2 rounded ${detailIsLastPage ? "bg-gray-300" : "bg-blue-500 text-white"}`}
+                >
+                  Trang cuối ⏭
+                </button>
               </div>
 
+              {/* Nút Đóng */}
               <button
                 className="mt-4 px-4 py-2 bg-red-500 text-white rounded"
                 onClick={() => setIsModalOpen(false)}
               >
                 ✖ Đóng
               </button>
+
             </div>
           </div>
         )}

@@ -135,46 +135,7 @@ const OrderList = () => {
         </ul>
       )}
 
-      {/* Modal Chi Tiết Đơn Hàng */}
-      {isModalOpen && selectedOrder && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-3xl w-full relative">
-            <button onClick={closeModal} className="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-xl">
-              ❌
-            </button>
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">📝 Chi Tiết Đơn Hàng: {selectedOrder.id}</h3>
-            <p className="text-gray-600">📦 Tổng sản phẩm: {selectedOrder.totalProducts}</p>
-            <p className="text-gray-600">📞 SĐT khách hàng: {selectedOrder.customerPhoneNumber}</p>
-            <p className="text-gray-600">👤 Tên khách hàng: {selectedOrder.customerName}</p>
-
-            <h4 className="text-lg font-semibold mt-4">📜 Danh sách QR Code:</h4>
-            <table className="w-full border-collapse border border-gray-200 mt-2">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="border p-3 text-left">🔢 Mã QR</th>
-                  <th className="border p-3 text-left">🏷️ Sản phẩm</th>
-                  <th className="border p-3 text-left">📅 NSX</th>
-                  <th className="border p-3 text-left">⏳ HSD</th>
-                  <th className="border p-3 text-left">🔢 Lô sản xuất</th>
-                  <th className="border p-3 text-left">👤 Đại lý</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedOrder.qrDetails.map((qr) => (
-                  <tr key={qr.id} className="border">
-                    <td className="border p-3">{qr.qrCode}</td>
-                    <td className="border p-3">{qr.bottleInfo.masterDataName}</td>
-                    <td className="border p-3">{qr.bottleInfo.manufacturingDate}</td>
-                    <td className="border p-3">{qr.bottleInfo.expirationDate}</td>
-                    <td className="border p-3">{qr.bottleInfo.batch}</td>
-                    <td className="border p-3">{qr.bottleInfo.owner}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      
 
 
       {/* Modal Chi Tiết Đơn Hàng */}
@@ -200,6 +161,7 @@ const OrderList = () => {
                 <tr className="bg-gray-100">
                   <th className="border p-3 text-left">🔢 Mã QR</th>
                   <th className="border p-3 text-left">🏷️ Sản phẩm</th>
+                  <th classname="border p-3 text-left">Tên Sản Phẩm</th>
                   <th className="border p-3 text-left">📅 NSX</th>
                   <th className="border p-3 text-left">⏳ HSD</th>
                   <th className="border p-3 text-left">🔢 Lô sản xuất</th>
@@ -210,6 +172,7 @@ const OrderList = () => {
                 {selectedOrder.qrDetails.map((qr) => (
                   <tr key={qr.id} className="border">
                     <td className="border p-3">{qr.qrCode}</td>
+                    <td className="border p-3">{qr.bottleInfo.masterDataId}</td>
                     <td className="border p-3">{qr.bottleInfo.masterDataName}</td>
                     <td className="border p-3">{qr.bottleInfo.manufacturingDate}</td>
                     <td className="border p-3">{qr.bottleInfo.expirationDate}</td>

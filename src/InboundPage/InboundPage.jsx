@@ -49,7 +49,7 @@ const InboundPage = () => {
         },
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       setDetails(response.data.data);
       setDetailTotalPages(response.data.totalPages);
       setDetailPage(page);
@@ -57,12 +57,50 @@ const InboundPage = () => {
       console.error("Error fetching details:", error);
     }
   };
-  
+
 
   const openPopup = (item) => {
     setSelectedItem(item);
     setShowPopup(true);
     fetchDetails(item, 0);
+  };
+  const downloadExcel = async (startDate, endDate) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.get(`${API_BASE_URL}/api/inbounds/exportInbound`, {
+        params: {
+          startDate: startDate || undefined,
+          endDate: endDate || undefined
+        },
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        responseType: "blob",
+      });
+
+      // 🔧 Format ngày
+      const formatDate = (dateStr) => {
+        const date = new Date(dateStr);
+        return date.toISOString().split("T")[0];
+      };
+
+      const formattedStart = startDate ? formatDate(startDate) : "all";
+      const formattedEnd = endDate ? formatDate(endDate) : "all";
+      const fileName = `inbounds-${formattedStart}_to_${formattedEnd}.xlsx`;
+
+      // 📥 Tạo link và tải file
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("❌ Lỗi khi tải file Excel:", error);
+      alert("Không thể tải file Excel.");
+    }
   };
 
   return (
@@ -70,18 +108,28 @@ const InboundPage = () => {
       {/* Sidebar bên trái */}
       <Sidebar />
       <div className="flex-1 mt-8 p-6 bg-white shadow-lg rounded-lg overflow-auto relative">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">📦 Danh sách nhập kho</h2>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">📦 Danh sách nhập kho</h2>
 
         {/* ✅ Nút Detail nằm góc phải ngoài cùng */}
-        <button
-          onClick={() => {
-            fetchDetails(0); // hoặc API nào bạn cần
-            setShowPopup(true);
-          }}
-          className="absolute top-6 right-6 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-        >
-          📋 Xem chi tiết
-        </button>
+        <div className="absolute top-6 right-6 flex gap-3">
+          <button
+            onClick={() => {
+              fetchDetails(0);
+              setShowPopup(true);
+            }}
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          >
+            📋 Xem chi tiết
+          </button>
+
+          <button
+            onClick={() => downloadExcel(startDate, endDate)}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            📥 Tải Excel
+          </button>
+        </div>
+
 
         {/* Bộ lọc ngày */}
         <div className="flex space-x-4 mb-4">
@@ -117,7 +165,7 @@ const InboundPage = () => {
                 <td className="border border-gray-300 px-4 py-2">{item.item}</td>
                 <td className="border border-gray-300 px-4 py-2">{item.itemName}</td>
                 <td className="border border-gray-300 px-4 py-2 text-center">{item.total}</td>
-               
+
               </tr>
             ))}
           </tbody>
@@ -149,6 +197,7 @@ const InboundPage = () => {
                   <tr className="bg-gray-200">
                     <th className="border px-2 py-1">ID</th>
                     <th className="border px-2 py-1">Item</th>
+                    <th className="border px-2 py-1">ItemName</th>
                     <th className="border px-2 py-1">Supplier</th>
                     <th className="border px-2 py-1">QR Code</th>
                     <th className="border px-2 py-1">Import Date</th>
@@ -163,6 +212,8 @@ const InboundPage = () => {
                     <tr key={index} className="hover:bg-gray-100">
                       <td className="border px-2 py-1">{detail.id}</td>
                       <td className="border px-2 py-1">{detail.item}</td>
+                      <td className="border px-2 py-1">{detail.itemName}</td>
+
                       <td className="border px-2 py-1">{detail.supplier}</td>
                       <td className="border px-2 py-1">{detail.qrCode}</td>
                       <td className="border px-2 py-1">{detail.importDate}</td>
@@ -175,7 +226,17 @@ const InboundPage = () => {
                 </tbody>
               </table>
 
-              <div className="flex justify-between items-center mt-4">
+              <div className="flex justify-between items-center mt-4 flex-wrap gap-2">
+                {/* Nút Trang đầu */}
+                <button
+                  onClick={() => fetchDetails(0)}
+                  disabled={detailPage === 0}
+                  className={`px-4 py-2 rounded ${detailPage === 0 ? "bg-gray-300" : "bg-blue-500 text-white"}`}
+                >
+                  ⏮ Trang đầu
+                </button>
+
+                {/* Nút Trang trước */}
                 <button
                   onClick={() => fetchDetails(detailPage - 1)}
                   disabled={detailPage === 0}
@@ -183,9 +244,13 @@ const InboundPage = () => {
                 >
                   ⬅ Trang trước
                 </button>
+
+                {/* Hiển thị trang hiện tại / tổng trang */}
                 <span className="text-lg font-medium">
                   Trang {detailPage + 1} / {detailTotalPages}
                 </span>
+
+                {/* Nút Trang sau */}
                 <button
                   onClick={() => fetchDetails(detailPage + 1)}
                   disabled={detailPage >= detailTotalPages - 1}
@@ -193,11 +258,25 @@ const InboundPage = () => {
                 >
                   Trang sau ➡
                 </button>
+
+                {/* Nút Trang cuối */}
+                <button
+                  onClick={() => fetchDetails(detailTotalPages - 1)}
+                  disabled={detailPage >= detailTotalPages - 1}
+                  className={`px-4 py-2 rounded ${detailPage >= detailTotalPages - 1 ? "bg-gray-300" : "bg-blue-500 text-white"}`}
+                >
+                  Trang cuối ⏭
+                </button>
               </div>
 
-              <button className="mt-4 px-4 py-2 bg-red-500 text-white rounded" onClick={() => setShowPopup(false)}>
-                Close
+              {/* Nút Đóng */}
+              <button
+                className="mt-4 px-4 py-2 bg-red-500 text-white rounded"
+                onClick={() => setShowPopup(false)}
+              >
+                ✖ Close
               </button>
+
             </div>
           </div>
         )}
