@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../component/sidebar";
 import { ClipLoader } from "react-spinners";
 import Modal from "react-modal";
+import Logo from "../component/logo";
 
 
 const DeliveryPage = () => {
@@ -192,7 +193,7 @@ const DeliveryPage = () => {
                         {generating ? <ClipLoader size={20} color="#ffffff" /> : "Generate QR Codes"}
                     </button>
                     <button onClick={() => setIsModalOpen(true)} className="bg-green-500 text-white px-4 py-2 rounded-lg mb-4">Tạo Delivery</button>
-
+<Logo></Logo>
                     {message && (
                         <p className={`mt-2 ${isError ? "text-red-500" : "text-green-500"}`}>
                             {message}

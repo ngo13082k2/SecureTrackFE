@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import API_BASE_URL from "../config";
 import Sidebar from "../component/sidebar";
-
+import Logo from "../component/logo";
 const CustomerPage = () => {
   const [customers, setCustomers] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -71,6 +71,8 @@ const CustomerPage = () => {
               ⬆ Import Excel
             </button>
           </div>
+          <Logo />
+
         </div>
 
         {customers.length === 0 ? (

@@ -21,20 +21,20 @@ const DeliveryQRCode = () => {
         axios.get(`${API_BASE_URL}/api/qrcode/delivery/${deliveryId}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
-        .then((response) => {
-            if (response.status === 200) {
-                setGroupedQrCodes(response.data);
-            } else {
-                console.error("Lỗi dữ liệu không hợp lệ:", response);
+            .then((response) => {
+                if (response.status === 200) {
+                    setGroupedQrCodes(response.data);
+                } else {
+                    console.error("Lỗi dữ liệu không hợp lệ:", response);
+                    setGroupedQrCodes([]);
+                }
+                setLoading(false);
+            })
+            .catch((error) => {
+                console.error("Lỗi khi lấy QR codes:", error);
                 setGroupedQrCodes([]);
-            }
-            setLoading(false);
-        })
-        .catch((error) => {
-            console.error("Lỗi khi lấy QR codes:", error);
-            setGroupedQrCodes([]);
-            setLoading(false);
-        });
+                setLoading(false);
+            });
     };
 
     if (loading) return <p className="text-center text-gray-500">Đang tải...</p>;
@@ -56,21 +56,28 @@ const DeliveryQRCode = () => {
                     return (
                         <div key={index}>
                             {pages.map((qrPage, pageIndex) => (
-                                <div key={pageIndex} className="mb-6 print-page-break-before">
-                                    <div className="print-header">
+                                <div
+                                    key={pageIndex}
+                                    className="mb-6 print-page-break-before"
+                                    style={{ breakInside: 'avoid' }} // 👈 Không bị tách ra giữa trang in
+                                >
+                                    {/* Tiêu đề sản phẩm */}
+                                    <div className="mb-2">
                                         <h2 className="text-lg font-semibold text-center">
                                             Sản phẩm: {group.productName} (ID: {group.itemId}) Batch: {group.batch} - Trang {pageIndex + 1}
                                         </h2>
                                     </div>
-                                    <div className="print-content grid grid-cols-6 gap-4">
+
+                                    {/* Grid chứa QR Code */}
+                                    <div className="grid grid-cols-6 gap-4 mt-4">
                                         {qrPage.map((qr, qrIndex) => (
-                                            <div key={qrIndex} className="p-4 bg-white shadow-lg rounded-lg text-center">
-                                                <img 
-                                                    src={`data:image/png;base64,${qr.qrCodeImage}`} 
-                                                    alt="QR Code" 
+                                            <div key={qrIndex} className="p-4 bg-white rounded-lg text-center">
+                                                <img
+                                                    src={`data:image/png;base64,${qr.qrCodeImage}`}
+                                                    alt="QR Code"
                                                     className="mx-auto w-32 h-32"
                                                 />
-                                                <p className="mt-2 text-sm font-medium">{qr.qrCode}</p>
+                                                <p className="mt-1 text-sm font-medium">{qr.qrCode}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -78,6 +85,7 @@ const DeliveryQRCode = () => {
                             ))}
                         </div>
                     );
+
                 })
             ) : (
                 <p className="text-center text-gray-500">Không có QR Code nào!</p>
