@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import API_BASE_URL from "../config";
-import Sidebar from "../component/sidebar";
-const OutboundPage = () => {
+import SidebarForBoss from "../component/sidebarForBoss";
+const OutboundPageForBoss = () => {
   const [outbounds, setOutbounds] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
@@ -18,17 +18,24 @@ const OutboundPage = () => {
   const pageSize = 10;
   const token = localStorage.getItem("token");
   const [detailIsLastPage, setDetailIsLastPage] = useState(false);
+  const [username, setUsername] = useState("");
 
   const fetchOutbounds = async (page = 0) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/outbounds/summaryByUser`, {
-        params: { page, size: pageSize, startDate, endDate },
+      const response = await axios.get(`${API_BASE_URL}/api/outbounds/summaryItem`, {
+        params: {
+          page,
+          size: pageSize,
+          startDate: startDate || null,
+          endDate: endDate || null,
+          username: username || null, // 👈 Thêm username vào đây
+        },
         headers: { Authorization: `Bearer ${token}` },
       });
 
       setOutbounds(response.data.data);
       setTotalItems(response.data.totalItems);
-      setGrandTotal(response.data.grandTotal)
+      setGrandTotal(response.data.grandTotal);
       setCurrentPage(response.data.currentPage);
       setTotalPages(response.data.totalPages);
     } catch (error) {
@@ -36,14 +43,16 @@ const OutboundPage = () => {
     }
   };
 
+
   const fetchOutboundDetails = async (page = 0) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/outbounds/DetailPagedByUser`, {
+      const response = await axios.get(`${API_BASE_URL}/api/outbounds/paged`, {
         params: {
           page,
           size: 10,
           startDate: startDate || undefined,
           endDate: endDate || undefined,
+          username: username || undefined
         },
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -65,8 +74,10 @@ const OutboundPage = () => {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await axios.get(`${API_BASE_URL}/api/outbounds/exportByUser`, {
-        params: { startDate, endDate },
+      const response = await axios.get(`${API_BASE_URL}/api/outbounds/export`, {
+        params: {   startDate: startDate || undefined,
+          endDate: endDate || undefined,
+          username: username || undefined },
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -108,7 +119,7 @@ const OutboundPage = () => {
   return (
     <div className="flex h-screen">
       {/* Sidebar bên trái */}
-      <Sidebar />
+      <SidebarForBoss />
       <div className="flex-1 mt-8 p-6 bg-white shadow-lg rounded-lg overflow-auto relative">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">📦 Tổng hợp sản phẩm xuất kho</h2>
         <div className="flex gap-4 mb-4">
@@ -119,6 +130,16 @@ const OutboundPage = () => {
           <label className="text-gray-700 font-medium">
             Đến ngày:
             <input type="date" className="ml-2 p-2 border rounded" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+          </label>
+          <label className="text-gray-700 font-medium">
+            Đại lý:
+            <input
+              type="text"
+              className="ml-2 p-2 border rounded"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Nhập tên đại lý"
+            />
           </label>
           <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={() => fetchOutbounds()}>🔍 Lọc</button>
         </div>
@@ -178,7 +199,7 @@ const OutboundPage = () => {
                 <table className="w-full border-collapse border border-gray-200">
                   <thead>
                     <tr className="bg-gray-100">
-                      
+
                       <th className="border p-3">Mã đơn</th>
                       <th className="border p-3">Khách hàng</th>
                       <th className="border p-3">item</th>
@@ -189,6 +210,8 @@ const OutboundPage = () => {
                       <th className="border p-3">NSX</th>
                       <th className="border p-3">HSD</th>
                       <th className="border p-3">Lô hàng</th>
+                      <th className="border p-3">Người bán</th>
+
                     </tr>
                   </thead>
                   <tbody>
@@ -204,13 +227,15 @@ const OutboundPage = () => {
                         <td className="border p-3">{new Date(detail.manufacturingDate).toLocaleDateString()}</td>
                         <td className="border p-3">{new Date(detail.expirationDate).toLocaleDateString()}</td>
                         <td className="border p-3">{detail.batch}</td>
+                        <td className="border p-3">{detail.dealer}</td>
+
                       </tr>
                     ))}
                   </tbody>
                 </table>
               )}
 
-          
+
               {/* Pagination in Popup */}
               <div className="flex justify-between items-center mt-4 flex-wrap gap-2">
                 {/* Nút Trang đầu */}
@@ -272,4 +297,4 @@ const OutboundPage = () => {
   );
 };
 
-export default OutboundPage;
+export default OutboundPageForBoss;

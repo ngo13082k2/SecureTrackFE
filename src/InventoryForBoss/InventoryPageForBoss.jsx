@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import API_BASE_URL from "../config";
-import Sidebar from "../component/sidebar";
-const InventoryPage = () => {
+import SidebarForBoss from "../component/sidebarForBoss";
+const InventoryPageForBoss = () => {
   const [inventory, setInventory] = useState([]);
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
@@ -16,12 +16,14 @@ const InventoryPage = () => {
   const token = localStorage.getItem("token");
   const [qrCode, setQrCode] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
+  const [username, setUsername] = useState("");
 
   const fetchInventory = async (page = 0) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/inbounds/stockByUser`, {
+      const response = await axios.get(`${API_BASE_URL}/api/inbounds/stock`, {
         params: {
-          date: selectedDate, // hoặc để null nếu bạn muốn lấy mặc định
+          date: selectedDate || null,
+          username: username || null, 
           page: page,
           size: pageSize,
         },
@@ -30,57 +32,25 @@ const InventoryPage = () => {
         },
       });
 
-      setInventory(response.data.data); // danh sách item tồn
-      setTotal(response.data.totalItems); // tổng số item phân trang
-      setCurrentPage(response.data.currentPage); // trang hiện tại
-      setTotalPages(response.data.totalPages); // tổng số trang
-      setGrandTotal(response.data.grandTotal); // tổng số lượng tất cả các item
+      setInventory(response.data.data);
+      setTotal(response.data.totalItems);
+      setCurrentPage(response.data.currentPage);
+      setTotalPages(response.data.totalPages);
+      setGrandTotal(response.data.grandTotal);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách tồn kho:", error);
     }
   };
 
-  // const fetchItemByQrCode = async () => {
-  //   if (!qrCode) return;
-  //   try {
-  //     const response = await axios.get(`${API_BASE_URL}/api/inbounds/by-qrcode`, {
-  //       params: { qrCode },
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
-  //     setQrItem(response.data);
-  //   } catch (error) {
-  //     console.error("Lỗi khi tìm sản phẩm theo QR:", error);
-  //     setQrItem(null);
-  //   }
-  // };
-
-  const toggleStatusByQrCode = async () => {
-    if (!qrCode) return;
-    try {
-      const response = await axios.put(`${API_BASE_URL}/api/inbounds/toggle-status`, null, {
-        params: { qrCode },
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      alert(response.data);
-      fetchInventory();
-      // fetchItemByQrCode();
-    } catch (error) {
-      console.error("Lỗi khi đổi trạng thái sản phẩm:", error);
-    }
-  };
-  const handlePageChange = (newPage) => {
-    // Cập nhật lại trang mới
-    setDetailPage(newPage);
-    // Gọi lại fetchDetails với trang mới
-    fetchDetails(newPage);
-  };
   const fetchDetails = async (page = 0) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/inbounds/allInventoryByUser`, {
+      const response = await axios.get(`${API_BASE_URL}/api/inbounds/allInventory`, {
         params: {
           page,
           size: 10,
-          inventoryDate: selectedDate || undefined,  // chỉ truyền 1 ngày
+          inventoryDate: selectedDate || undefined,
+          username: username || null, 
+          // chỉ truyền 1 ngày
         },
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -98,8 +68,9 @@ const InventoryPage = () => {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await axios.get(`${API_BASE_URL}/api/inbounds/exportInventoryByUser`, {
-        params: { inventoryDate },
+      const response = await axios.get(`${API_BASE_URL}/api/inbounds/exportInventory`, {
+        params: { inventoryDate ,          username: username || null, 
+        },
         headers: {
           Authorization: `Bearer ${token}`
         },
@@ -140,28 +111,25 @@ const InventoryPage = () => {
   return (
     <div className="flex h-screen">
       {/* Sidebar bên trái */}
-      <Sidebar />
+      <SidebarForBoss />
       <div className="flex-1 mt-8 p-6 bg-white shadow-lg rounded-lg overflow-auto">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">📦 Danh sách tồn kho</h2>
         <div className="flex space-x-4 mb-4">
-          <input
-            type="text"
-            placeholder="Nhập mã QR..."
-            value={qrCode}
-            onChange={(e) => setQrCode(e.target.value)}
-            className="border p-2 rounded"
-          />
-          {/* <button onClick={fetchItemByQrCode} className="bg-blue-500 text-white px-4 py-2 rounded">
-      🔍 Tìm kiếm
-    </button> */}
-          <button onClick={toggleStatusByQrCode} className="bg-yellow-500 text-white px-4 py-2 rounded">
-            🔄 Đổi trạng thái
-          </button>
+
+
+
           <label className="text-gray-700 font-medium">📅 Ngày tồn kho:</label>
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
+            className="border p-2 rounded"
+          />
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Tên người dùng"
             className="border p-2 rounded"
           />
 
@@ -266,6 +234,8 @@ const InventoryPage = () => {
                         <th className="border p-3 text-center">🏭 Ngày sản xuất</th>
                         <th className="border p-3 text-center">📆 Hạn sử dụng</th>
                         <th className="border p-3 text-center">📦 Lô hàng</th>
+                        <th className="border p-3 text-center">📦 Đại Lý</th>
+
                         <th className="border p-3 text-center">🛑 Trạng thái</th>
                       </tr>
                     </thead>
@@ -280,6 +250,8 @@ const InventoryPage = () => {
                           <td className="border p-3 text-center">{new Date(detail.manufacturingDate).toLocaleDateString()}</td>
                           <td className="border p-3 text-center">{new Date(detail.expirationDate).toLocaleDateString()}</td>
                           <td className="border p-3 text-center">{detail.batch}</td>
+                          <td className="border p-3 text-center">{detail.userName}</td>
+
                           <td
                             className={`border p-3 text-center font-bold ${detail.status === "ACTIVE" ? "text-green-600" : "text-red-600"
                               }`}
@@ -357,4 +329,4 @@ const InventoryPage = () => {
   );
 };
 
-export default InventoryPage;
+export default InventoryPageForBoss;

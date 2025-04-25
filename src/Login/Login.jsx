@@ -22,30 +22,32 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
+  
     try {
       const response = await axios.post(`${API_BASE_URL}/api/auth/login`, formData);
       const { token } = response.data;
-    
+  
       localStorage.setItem("token", token);
       const decodedToken = jwtDecode(token);
       const userRole = response.data.role;
-    
-    
-      if (userRole === 'MEMBER') {
-        localStorage.setItem("loginSuccess", "true"); // 👈 Đánh dấu đã đăng nhập thành công
+  
+      localStorage.setItem("loginSuccess", "true"); // ✅ Lưu trạng thái đăng nhập thành công
+  
+      // 👉 Điều hướng theo vai trò
+      if (userRole === "MEMBER") {
         navigate("/masterData");
+      } else if (userRole === "BOSS") {
+        navigate("/InventorySummarry");
       } else {
-        navigate("/dashboard");
+        navigate("/dashboard"); 
       }
     } catch (err) {
       console.error("Lỗi đăng nhập:", err);
       setError("❌ Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin.");
       toast.error("❌ Đăng nhập thất bại!");
     }
-    
   };
-
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden">

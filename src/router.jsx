@@ -9,6 +9,9 @@ import CustomerPage from "./CustomerPage/CustomerPage";
 import OutboundPage from "./OutboundPage/OutboundPage";
 import InboundPage from "./InboundPage/InboundPage";
 import InventoryPage from "./InventoryPage/InventoryPage";
+import OutboundPageForBoss from "./OutboundPageforBoss/OutboundPageForBoss";
+import InventoryPageForBoss from "./InventoryForBoss/InventoryPageForBoss";
+import InboundPageForBoss from "./InboundPageForBoss/InboundPageForBoss";
 const AppRoutes = () => {
   return (
     <Router>
@@ -24,6 +27,13 @@ const AppRoutes = () => {
         <Route path="/outbound" element={<OutboundPage />} />
         <Route path="/inbound" element={<InboundPage />} />
         <Route path="/inventory" element={<InventoryPage />} />
+        <Route path="/OutboundPageSumarry" element={<OutboundPageForBoss />} />
+        <Route path="/InventorySummarry" element={<InventoryPageForBoss />} />
+        <Route path="/InboundPageSumarry" element={<InboundPageForBoss />} />
+
+
+
+
 
 
       </Routes>

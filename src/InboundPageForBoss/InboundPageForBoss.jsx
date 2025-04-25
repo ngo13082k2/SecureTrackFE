@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import API_BASE_URL from "../config";
-import Sidebar from "../component/sidebar";
-const InboundPage = () => {
+import SidebarForBoss from "../component/sidebarForBoss";
+const InboundPageForBoss = () => {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -15,6 +15,8 @@ const InboundPage = () => {
   const [endDate, setEndDate] = useState("");
   const [totalQuantity, setTotalQuantity] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
+  const [username, setUsername] = useState("");
+
   const pageSize = 15;
 
   useEffect(() => {
@@ -24,14 +26,20 @@ const InboundPage = () => {
   const fetchData = async (page) => {
     const token = localStorage.getItem("token");
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/inbounds/summary-by-user`, {
-        params: { page, size: pageSize, startDate, endDate },
+      const response = await axios.get(`${API_BASE_URL}/api/inbounds/uniqueItems`, {
+        params: {
+          page,
+          size: pageSize,
+          startDate: startDate || undefined,  // bỏ qua nếu rỗng
+          endDate: endDate || undefined,
+          username: username || undefined, 
+        },
         headers: { Authorization: `Bearer ${token}` },
       });
+
       setData(response.data.data);
       setTotalPages(response.data.totalPages);
       setGrandTotal(response.data.grandTotal);
-
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -40,12 +48,14 @@ const InboundPage = () => {
   const fetchDetails = async (page = 0) => {
     const token = localStorage.getItem("token");
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/inbounds/DetailpagedByUser`, {
+      const response = await axios.get(`${API_BASE_URL}/api/inbounds/paged`, {
         params: {
           page,
           size: pageSize,
           startDate: startDate || undefined,  // bỏ qua nếu rỗng
           endDate: endDate || undefined,
+          username: username || null, 
+
         },
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -59,19 +69,18 @@ const InboundPage = () => {
   };
 
 
-  const openPopup = (item) => {
-    setSelectedItem(item);
-    setShowPopup(true);
-    fetchDetails(item, 0);
-  };
+ 
   const downloadExcel = async (startDate, endDate) => {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await axios.get(`${API_BASE_URL}/api/inbounds/exportInboundByUser`, {
+      const response = await axios.get(`${API_BASE_URL}/api/inbounds/exportInbound`, {
         params: {
           startDate: startDate || undefined,
-          endDate: endDate || undefined
+          endDate: endDate || undefined,
+          username: username || undefined
+
+          
         },
         headers: {
           Authorization: `Bearer ${token}`
@@ -106,7 +115,7 @@ const InboundPage = () => {
   return (
     <div className="flex h-screen">
       {/* Sidebar bên trái */}
-      <Sidebar />
+      <SidebarForBoss />
       <div className="flex-1 mt-8 p-6 bg-white shadow-lg rounded-lg overflow-auto relative">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">📦 Danh sách nhập kho</h2>
 
@@ -145,7 +154,16 @@ const InboundPage = () => {
             onChange={(e) => setEndDate(e.target.value)}
             className="border p-2 rounded"
           />
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Tên Đại lý"
+            className="border p-2 rounded"
+          />
+
           <button onClick={() => fetchData(0)} className="bg-blue-500 text-white px-4 py-2 rounded">Lọc</button>
+
         </div>
 
         <p className="text-lg font-medium mb-2">📊 Tổng số lượng: <span className="font-bold text-blue-600">{grandTotal}</span></p>
@@ -204,6 +222,8 @@ const InboundPage = () => {
                     <th className="border px-2 py-1">Manufacturing Date</th>
                     <th className="border px-2 py-1">Expiration Date</th>
                     <th className="border px-2 py-1">Batch</th>
+                    <th className="border px-2 py-1">Đại Lý</th>
+
                     <th className="border px-2 py-1">Status</th>
                   </tr>
                 </thead>
@@ -220,6 +240,8 @@ const InboundPage = () => {
                       <td className="border px-2 py-1">{detail.manufacturingDate}</td>
                       <td className="border px-2 py-1">{detail.expirationDate}</td>
                       <td className="border px-2 py-1">{detail.batch}</td>
+                      <td className="border px-2 py-1">{detail.userName}</td>
+
                       <td className="border px-2 py-1">{detail.status}</td>
                     </tr>
                   ))}
@@ -286,4 +308,4 @@ const InboundPage = () => {
   );
 };
 
-export default InboundPage;
+export default InboundPageForBoss;

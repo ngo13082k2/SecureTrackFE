@@ -180,20 +180,36 @@ const DeliveryPage = () => {
                 <h1 className="text-3xl font-semibold mb-4 text-center">DANH SÁCH GIAO HÀNG</h1>
                 <div className="mb-4 p-4 bg-white shadow-lg rounded-lg">
                     <h2 className="text-lg font-semibold mb-2">Upload File Excel</h2>
-                    <input type="file" accept=".xlsx" onChange={handleFileChange} className="mb-2" />
+
+                    <div className="flex justify-between items-center mb-4">
+                        {/* Nhóm input và button upload */}
+                        <div className="flex items-center space-x-2">
+                            <input
+                                type="file"
+                                accept=".xlsx"
+                                onChange={handleFileChange}
+                                className="border rounded px-2 py-1"
+                            />
+                            <button
+                                onClick={handleUpload}
+                                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                disabled={isUploading}
+                            >
+                                {isUploading ? <ClipLoader size={20} color="#ffffff" /> : "Upload"}
+                            </button>
+                        </div>
+
+                        {/* Logo nằm bên phải */}
+                        <Logo />
+                    </div>
+
                     <button
-                        onClick={handleUpload}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                        disabled={isUploading}>
-                        {isUploading ? <ClipLoader size={20} color="#ffffff" /> : "Upload"}
-                    </button>                    <button
                         onClick={handleGenerateQRCode}
                         className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700 mb-4 flex items-center justify-center"
                         disabled={generating}>
                         {generating ? <ClipLoader size={20} color="#ffffff" /> : "Generate QR Codes"}
                     </button>
                     <button onClick={() => setIsModalOpen(true)} className="bg-green-500 text-white px-4 py-2 rounded-lg mb-4">Tạo Delivery</button>
-<Logo></Logo>
                     {message && (
                         <p className={`mt-2 ${isError ? "text-red-500" : "text-green-500"}`}>
                             {message}
